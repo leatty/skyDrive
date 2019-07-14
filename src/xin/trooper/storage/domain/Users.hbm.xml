@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+    
+    <!-- 
+    private int user_id;
+	private String user_name;
+	private String user_account;
+	private String user_password;
+     -->
+    
+<hibernate-mapping>
+	<!-- 建立类与表的映射 -->
+	<class name="xin.trooper.storage.domain.Users" table="users">
+		<!-- 建立类中的属性与表中的主键对应 -->
+		<id name="user_id" column="user_id">
+			<!-- 主键生成策略 -->
+			<generator class="native"/>
+		</id>
+		
+		<!-- 建立类中的普通的属性和表的字段的对应 -->
+		<property name="user_name" column="user_name"/>
+		<property name="user_account" column="user_account" unique="true" />
+		<property name="user_password" column="user_password"/>
+		
+	</class>
+	
+</hibernate-mapping>

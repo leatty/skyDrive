@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+<struts>
+	<!-- 配置Struts2的常量 -->
+	<constant name="struts.action.extension" value="action"/>
+	 <constant name="struts.multipart.saveDir" value="D:/upload"></constant>
+	 
+	<!-- 配置Struts2中所上传的文件的总大小 -->
+	<constant name="struts.multipart.maxSize" value="9999999999999999"></constant>
+	
+	<package name="webstorage" extends="struts-default" namespace="/">
+		
+		<!-- 定义拦截器 -->
+		<interceptors>
+			<interceptor name="authorityCheckInterceptor" class="xin.trooper.storage.interceptor.AuthorityCheckInterceptor">
+				<!-- 指定不使用这个拦截器的方法 -->
+				<param name="excludeMethods">shareDownload,privateShareDownload,download</param>
+			</interceptor>
+		</interceptors>
+		
+		
+		<!-- 调试环境的测试Action -->
+		<action name="test_*" class="testAction" method="{1}">
+			<result name="test">/test.jsp</result>
+			<result name="input">/file.jsp</result>
+			<result name="file">/file.jsp</result>
+			
+			<result name="success" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="inputName">inputStream</param>
+				<param name="contentDisposition">attachment;fileName=${fileName}</param>
+			</result>
+			
+			<interceptor-ref name="defaultStack">
+				<param name="fileUpload.maximumSize">9999999999999999</param>
+				<param name="fileUpload.allowedExtensions">.ini,.bmp</param>
+			</interceptor-ref>
+		</action>
+		
+		<!-- 用户Action -->
+		<action name="user_*" class="userAction" method="{1}">
+			<result name="success" type="redirect">/index.jsp</result>
+			<result name="regist_success">/login.jsp</result>
+			<result name="regist_error">/regist.jsp</result>
+			<result name="login_success">/file.jsp</result>
+			<result name="login_error">/login.jsp</result>
+			<result name="logoff_success">/login.jsp</result>
+		</action>
+		
+		
+		<!-- 存储Action -->
+		<action name="storage_*" class="storageAction" method="{1}">
+			<!-- 定义上传文件大小限制 -->
+			<interceptor-ref name="defaultStack">
+				<param name="fileUpload.maximumSize">9999999999999999</param>
+			</interceptor-ref>
+			<!-- 引入自定义拦截器 -->
+			<interceptor-ref name="authorityCheckInterceptor"></interceptor-ref>
+			<interceptor-ref name="defaultStack"></interceptor-ref>
+			
+			
+			<!-- 跳转配置 -->
+			<result name="error">/error.jsp</result>
+			<result name="virtualfile_view">/file.jsp</result>
+			<result name="upload_success">/file.jsp</result>
+			<result name="upload_error">/error.jsp</result>
+			<result name="virdelete_success">/file.jsp</result>
+			<result name="recyclebin_view">/recyclebin.jsp</result>
+			<result name="rename_success">/file.jsp</result>
+			<result name="delete_success">/recyclebin.jsp</result>
+			<result name="delete_error">/error.jsp</result>
+			<result name="recover_success">/recyclebin.jsp</result>
+			<result name="share_view">/share.jsp</result>
+			<result name="share_success">/file.jsp</result>
+			<result name="sharedelete_success">/share.jsp</result>
+			<result name="sharedownload">/sharedownload.jsp</result>
+			<result name="previoussharedownload">/previoussharedownload.jsp</result>
+			<result name="sharepassword_right">/sharedownload.jsp</result>
+			<result name="sharepassword_error">/previoussharedownload.jsp</result>
+			<result name="search_success">/file.jsp</result>
+			<result name="classify_success">/file.jsp</result>
+			<result name="videoPreview_success">/videoPreview.jsp</result>
+			<result name="documentPreview_success">/documentPreview.jsp</result>
+			
+			
+			
+			<result name="download" type="stream">
+				<param name="contentType">application/octet-stream</param>
+				<param name="inputName">inputStream</param>
+				<param name="contentDisposition">attachment;fileName=${fileName}</param>
+			</result>
+		</action>
+	</package>
+	
+</struts>

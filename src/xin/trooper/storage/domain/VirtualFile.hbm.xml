@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+    
+    <!--
+    private int virfile_id;
+	private String virfile_name;
+	private String virfile_ext;
+	private String virfile_path;
+	private String virfile_size;
+	private Timestamp upload_date;
+	private int file_id;
+	private int user_id;
+    -->
+    
+<hibernate-mapping>
+	<!-- 建立类与表的映射 -->
+	<class name="xin.trooper.storage.domain.VirtualFile" table="virtualfile">
+		<!-- 建立类中的属性与表中的主键对应 -->
+		<id name="virfile_id" column="virfile_id">
+			<!-- 主键生成策略 -->
+			<generator class="native"/>
+		</id>
+		
+		<!-- 建立类中的普通的属性和表的字段的对应 -->
+		<property name="virfile_name" column="virfile_name"/>
+		<property name="virfile_ext" column="virfile_ext"/>
+		<property name="virfile_path" column="virfile_path"/>
+		<property name="virfile_size" column="virfile_size"/>
+		<property name="upload_date" column="upload_date"  />
+		<property name="file_id" column="file_id"/>
+		<property name="user_id" column="user_id"/>
+	</class>
+	
+</hibernate-mapping>

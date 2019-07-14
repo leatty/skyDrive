@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+    "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+    "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+    
+    <!-- 
+    private int share_id;
+	private int user_id;
+	private String virfile_id;
+	private Timestamp share_date;
+	private String share_password;
+     -->
+<hibernate-mapping>
+	<!-- 建立类与表的映射 -->
+	<class name="xin.trooper.storage.domain.Share" table="share">
+		<!-- 建立类中的属性与表中的主键对应 -->
+		<id name="share_id" column="share_id" >
+			<!-- 主键生成策略 -->
+			<generator class="native"/>
+		</id>
+		
+		<!-- 建立类中的普通的属性和表的字段的对应 -->
+		<property name="user_id" column="user_id"  />
+		<property name="virfile_id" column="virfile_id"  />
+		<property name="share_name" column="share_name"  />
+		<property name="share_date" column="share_date"  />
+		<property name="share_password" column="share_password"  />
+	</class>
+</hibernate-mapping>
