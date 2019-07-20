@@ -15,6 +15,7 @@ import xin.trooper.storage.dao.UserDao;
 import xin.trooper.storage.domain.Users;
 import xin.trooper.storage.domain.VirtualFile;
 import xin.trooper.storage.service.UserService;
+import xin.trooper.storage.utils.StorageUtils;
 
 @Transactional
 public class UserServiceImpl implements UserService {

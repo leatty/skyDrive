@@ -116,11 +116,24 @@ Users existUser = (Users)request.getSession().getAttribute("loginedUser");
 		}else{
 			$(".drivelogo").parent().attr("href","/webstorage/storage_shareView.action"); 
 		}
-		 var sizeOfMB = '<s:property value="virfile_size"/>';
-		  sizeOfMB = sizeOfMB/1024/1024;
-		  sizeOfMB = sizeOfMB.toFixed(2);
-		  sizeOfMB = sizeOfMB + " MB";
-		 $("#filesize").text(sizeOfMB);
+		 var size = '<s:property value="virfile_size"/>';
+		 var finalSize;
+		  size = '<s:property value="virfile_size"/>'/1073741824;
+		  finalSize =size.toFixed(2) + 'GB';
+		  if(size < 1){
+			  size = '<s:property value="virfile_size"/>'/1048576;
+			  finalSize =size.toFixed(2) + 'MB';
+			  if(size < 1){
+				  size = '<s:property value="virfile_size"/>'/1024;
+				  finalSize =size.toFixed(2) + 'KB';
+				  if(size < 1){
+					  size = '<s:property value="virfile_size"/>';
+					  finalSize =size + 'Byte';
+				  }
+			  }
+		  }
+	  	 console.log(finalSize);
+		 $("#filesize").text(finalSize);
 	 });
 	 $("#downloadbtn").click(function () {
 		 var virfile_id = $("#virfile_id").attr("value");

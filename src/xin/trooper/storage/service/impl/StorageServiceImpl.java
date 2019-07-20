@@ -38,191 +38,113 @@ public class StorageServiceImpl implements StorageService {
 		this.storageDao = storageDao;
 	}
 
-	
-	
-	
-	
-	
-//	/**
-//	 * 
-//	 * 文件上传
-//	 */
-//	@Override
-//	public String upload(String uploadFileName,File upload,String  uploadContextType) throws IOException {
-//		String status = null;
-//		if(upload != null) {
-//			System.out.println("==StorageServiceImpl.upload(String uploadFileName,File upload,String  uploadContextType)");
-//			//uploadFileName: "哆啦A梦原谅帽.jpg"
-//			System.out.println(uploadFileName);
-//			//设置文件上传路径
-//			String path = "D:/upload";
-//			//一个目录下存放的相同文件名：随机文件名 
-//			//uuidFileName: "uuidFileName:5544c4dd87f347dba2501f7614c79c4c.jpg"
-//			String uuidFileName = StorageUtils.getUuidFileName(uploadFileName);
-//			System.out.println("uuidFileName: "+uuidFileName);
-//			//一个目录下存放的文件过多，目录分离(在上传路径中添加两级目录，文件随机存入不同的目录) 
-//			//realPath: "/1/6"
-//			String realPath = StorageUtils.getPath(uuidFileName);
-//			//创建目录：  
-//			//url:"D:/upload/1/6"
-//			String url = path + realPath;
-//			File file = new File(url);
-//			if(file.exists()) {
-//				file.mkdirs();
-//			}
-//			//文件上传 
-//			//storagePath: "D:/upload/1/6/5544c4dd87f347dba2501f7614c79c4c.jpg"
-//			String storagePath = url + "/" + uuidFileName;
-//			System.out.println("storagePath: " + storagePath);
-//			File dictFile = new File(storagePath);
-//			FileUtils.copyFile(upload, dictFile);
-//			
-//		    //数据库中添加文件记录，virtualfIle表和Realfile表
-//			//1.获取当前登录用户信息
-//			HttpSession session = ServletActionContext.getRequest().getSession();
-//			Users users = (Users) session.getAttribute("loginedUser");
-//			System.out.println(users);
-//			//2.准备表信息
-//			VirtualFile virtualFile = new VirtualFile();
-//			virtualFile.setVirfile_name(uploadFileName);
-//			virtualFile.setVirfile_ext(StorageUtils.getExtName(uploadFileName));
-//			virtualFile.setVirfile_path("myfile");
-//			virtualFile.setUser_id(users.getUser_id());
-//			virtualFile.setUpload_date(new Timestamp((new java.util.Date()).getTime()));
-//			
-//			RealFile realFile = new RealFile();
-//			realFile.setFile_name(uuidFileName);
-//			realFile.setFile_path(storagePath);
-//			String preview_path = storagePath.replace("D:/upload", "");
-//			System.out.println("preview_path : " + preview_path);
-//			realFile.setPreview_path(preview_path);
-//			String fileMD5 = StorageUtils.getFileMD5(dictFile);
-//			System.out.println("fileMD5 : " + fileMD5);
-//			realFile.setFile_hash(fileMD5);
-//			//保存表信息
-//			List<RealFile> list = storageDao.getRealFileByHash(fileMD5);
-//			if(list.isEmpty()) {
-//				
-//				realFile.setFile_amount(1);
-//				int file_id = storageDao.saveRealFile(realFile);
-//				virtualFile.setFile_id(file_id);
-//				storageDao.saveVirtualFile(virtualFile);
-//			}else {
-//				RealFile real = list.get(0);
-//				int num = real.getFile_amount();
-//				real.setFile_amount(num + 1);
-//				storageDao.updateRealFile(real);
-//				virtualFile.setFile_id(real.getFile_id());
-//				storageDao.saveVirtualFile(virtualFile);
-//			}
-//			//查询用户文件列表,压入值栈
-//			this.findALLStorageFile();
-//			status = "upload_success";
-//		}else {
-//			status= "upload_error";
-//		}
-//		return status;	
-//	}
+	static Properties properties = new Properties(); 
+	static{
+		
+		InputStream in = StorageServiceImpl.class.getClassLoader().getResourceAsStream("storage.properties");
+		try {
+			properties.load(in);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * 
 	 * 文件上传
 	 */
 	@Override
-	public String upload(String uploadFileName,File upload,String  uploadContextType) throws IOException {
+	public String upload(String uploadFileName,File upload,String  uploadContextType, String md5) throws IOException {
 		System.out.println("==StorageServiceImpl.upload(String uploadFileName,File upload,String  uploadContextType)");
 		String status = null;
 		if(upload != null) {
-			//uploadFileName: "哆啦A梦原谅帽.jpg"
-			System.out.println(uploadFileName);
-			//设置文件上传路径,在storage.properties中的path键定义 
-			String path = "";
-			Properties properties = new Properties(); 
-			InputStream in = StorageServiceImpl.class.getClassLoader().getResourceAsStream("storage.properties");
-			properties.load(in);
-			path = properties.getProperty("path");
+			System.out.println("uploadFileName: " + uploadFileName + "  md5: " + md5);
+			//设置文件上传路径,path在storage.properties中的path键定义  
+			String path = properties.getProperty("path");
 			System.out.println("path: " + path);
 			//一个目录下存放的相同文件名：随机文件名
 			//uuidFileName: "uuidFileName:5544c4dd87f347dba2501f7614c79c4c.jpg"
 			String uuidFileName = StorageUtils.getUuidFileName(uploadFileName);
 			System.out.println("uuidFileName: "+uuidFileName);
-			//一个目录下存放的文件过多，目录分离(在上传路径中添加两级目录，文件随机存入不同的目录) 
-			//realPath: "/1/6"
-			String mkrPath = StorageUtils.getPath(uuidFileName);
-			//创建目录：  
-			//url:"D:/upload/1/6"
-			String url = path + mkrPath;
-			File mkrfile = new File(url);
+			//一个目录下存放的文件过多，目录分离(在上传路径中添加两级目录，文件随机存入不同的目录) dirPath: "/1/6"
+			String dirPath = StorageUtils.getPath(uuidFileName);
+			//创建目录：  partPath:"D:/upload/1/6"
+			String partPath = path + dirPath;
+			File mkrfile = new File(partPath);
 			if(mkrfile.exists()) {
 			}else {
 				mkrfile.mkdirs();
 			}
 			//生成copyFile()方法需要的存储路径
 			//storagePath: "D:/upload/1/6/5544c4dd87f347dba2501f7614c79c4c.jpg"
-			String storagePath = url + "/" + uuidFileName;
+			String storagePath = partPath + "/" + uuidFileName;
 			System.out.println("storagePath: " + storagePath);
 			//上传文件
+			//先判断文件是否在服务端已经存在
+			List<RealFile> xlist = storageDao.getRealFileByHash(md5);
+			boolean isEmpty = xlist.isEmpty();
 			File dictFile = new File(storagePath);
-			FileUtils fileUtiles = new FileUtils();
-			fileUtiles.copyFile(upload, dictFile);
-			
-			fileUtiles = null;
-			String fileMD5 = StorageUtils.getFileMD5(dictFile);
-			long file_size = FileUtils.sizeOf(dictFile);
-			System.out.println("fileMD5 : " + fileMD5 + " , fileSize : " + file_size);
-			List<RealFile> list = storageDao.getRealFileByHash(fileMD5);
-			for(RealFile r : list) {
-				System.out.println(r);
-			}
-			if(list.isEmpty()) {
-				System.out.println("list is null");
+			String fileMD5 = null;
+			Long file_size = null;
+			if(isEmpty) {
+				System.out.println("file no exist!");
+				FileUtils.copyFile(upload, dictFile);
+				//file_size = FileUtils.sizeOf(dictFile);
+				File file = new File(storagePath);
+				fileMD5 = StorageUtils.getFileMD5(file);
+				file_size = file.length();
+				System.out.println("fileMD5: " + fileMD5);
+				if(fileMD5.equals(md5)) {
+					System.out.println("传输过程正确！");
+				}else {
+					System.out.println("传输过程出错！");
+					dictFile.delete();
+				}
 			}else {
-				System.out.println("list is not null");
-				if(dictFile.canWrite()) {
-					System.out.println("file can write");
-				}else {
-					System.out.println("file can not write");
+				System.out.println("file exist!");
+				for(RealFile r : xlist) {
+					System.out.println(r);
 				}
-				if(dictFile.delete()) {
-					System.out.println("delete file success");
-				}else {
-					System.out.println("can not delete file");
-				}
+				fileMD5 = md5;
+				File file = new File(path + xlist.get(0).getFile_path());
+				file_size = file.length();
 			}
+			
 		    //数据库中添加文件记录，virtualfIle表和Realfile表
 			//1.获取当前登录用户信息
 			HttpSession session = ServletActionContext.getRequest().getSession();
 			Users users = (Users) session.getAttribute("loginedUser");
 			System.out.println(users);
-			//2.准备表信息
+			
 			VirtualFile virtualFile = new VirtualFile();
 			virtualFile.setVirfile_name(uploadFileName);
 			virtualFile.setVirfile_ext(StorageUtils.getExtName(uploadFileName));
 			virtualFile.setVirfile_path("myfile");
 			virtualFile.setVirfile_size(file_size);
-			virtualFile.setUser_id(users.getUser_id());
 			virtualFile.setUpload_date(new Timestamp((new java.util.Date()).getTime()));
-			System.out.println(virtualFile);
-			RealFile realFile = new RealFile();
-			realFile.setFile_name(uuidFileName);
-			realFile.setFile_path(storagePath);
-			String preview_path = storagePath.replace(path, "");
-			realFile.setPreview_path(preview_path);
-			realFile.setFile_hash(fileMD5);
-			System.out.println(realFile);
-			//保存表信息
-			if(list.isEmpty()) {
+			virtualFile.setUser_id(users.getUser_id());
+			if(isEmpty) {
+				RealFile realFile = new RealFile();
+				realFile.setFile_name(uuidFileName);
+				String file_path = storagePath.replace(path, "");
+				realFile.setFile_path(file_path);
+				realFile.setFile_hash(fileMD5);
 				realFile.setFile_amount(1);
+				System.out.println(realFile);
 				int file_id = storageDao.saveRealFile(realFile);
 				virtualFile.setFile_id(file_id);
+				System.out.println(virtualFile);
 				storageDao.saveVirtualFile(virtualFile);
 			}else {
-				RealFile real = list.get(0);
-				int num = real.getFile_amount();
-				real.setFile_amount(num + 1);
-				storageDao.updateRealFile(real);
-				virtualFile.setFile_id(real.getFile_id());
+				RealFile realFile = xlist.get(0);
+				int num = realFile.getFile_amount();
+				realFile.setFile_amount(num + 1);
+				storageDao.updateRealFile(realFile);
+				virtualFile.setFile_id(realFile.getFile_id());
+				System.out.println(virtualFile);
 				storageDao.saveVirtualFile(virtualFile);
 			}
+			dictFile = null;
 			//查询用户文件列表,压入值栈
 			this.findALLStorageFile();
 			status = "upload_success";
@@ -253,7 +175,23 @@ public class StorageServiceImpl implements StorageService {
 
 
 
-	
+	/**  
+	    * 从服务器上 删除文件  
+	 * @param fileName 文件名  
+	 * @return true: 从服务器上删除成功   false:否则失败  
+	 */  
+	public boolean deleteStorageFile(String storagePath){
+		Boolean result = false;
+		System.out.println("storagePath = " + storagePath);
+	    File file=new File(storagePath);   
+	    if(file.exists()){ 
+	    	System.out.println("file exist, deleting...");
+	    	result =  file.delete();   
+	    }else {
+	    	System.out.println("not exist");
+	    }   
+	    return result;   
+	}
 
 	/**
 	 * 
@@ -281,8 +219,9 @@ public class StorageServiceImpl implements StorageService {
 			status = this.findAllRecycleBin();
 		}else {
 			//等于1则删除回收站记录，同时删除真实文件记录和存储的文件
-			StorageUtils storageUtils = new StorageUtils();
-			if(storageUtils.deleteStorageFile(realFile.getFile_path())) {
+			String storagePath = properties.getProperty("path") + realFile.getFile_path();
+			System.out.println("storagePath: " + storagePath);
+			if(deleteStorageFile(storagePath)) {
 				storageDao.deleteRecycleBin(recycleBin);
 				storageDao.deleteRealFile(realFile);
 				status = this.findAllRecycleBin();
@@ -339,7 +278,8 @@ public class StorageServiceImpl implements StorageService {
 		System.out.println("file_path : " + realFile.getFile_path());
 		List<String> list = new ArrayList<String>();
 		list.add(0, virtualFile.getVirfile_name());
-		list.add(1, realFile.getFile_path());
+		String storagePath = properties.getProperty("path") + realFile.getFile_path();
+		list.add(1, storagePath);
 		return list;
 	}
 
@@ -470,7 +410,10 @@ public class StorageServiceImpl implements StorageService {
 		Users users = (Users) session.getAttribute("loginedUser");
 		System.out.println(users);
 		List<Share> shareList = storageDao.getALllShare(users);
+		String partURL = properties.getProperty("server_protocol") + "://" + properties.getProperty("server_name") + ":" + properties.getProperty("server_port");
+		System.out.println("partURL: " + partURL);
 		ValueStack valueStack = ActionContext.getContext().getValueStack();
+		valueStack.set("partURL", partURL);
 		valueStack.set("shareList", shareList);
 		return "share_view";
 	}
@@ -681,6 +624,20 @@ public class StorageServiceImpl implements StorageService {
 
 
 
+	/**
+	 * 
+	 * 获取预览文件的URL
+	 */
+	public String getPreviewURL(String file_path) {
+		String server_protocol = properties.getProperty("server_protocol");
+		String server_name = properties.getProperty("server_name");
+		String server_port = properties.getProperty("server_port");
+		String server_resource = properties.getProperty("server_resource");
+		String previewURL = server_protocol + "://" + server_name + ":" + server_port + "/" + server_resource + file_path;
+		System.out.println("previewURL: " + previewURL);
+		return previewURL;
+		
+	}
 
 
 	/**
@@ -698,12 +655,13 @@ public class StorageServiceImpl implements StorageService {
 		List<RealFile> rlist = storageDao.getRealFileById(realFile);
 		realFile = rlist.get(0);
 		System.out.println(realFile);
-		String video_path = realFile.getPreview_path();
+		String file_path = realFile.getFile_path();
+		String videoURL = getPreviewURL(file_path);
 		String video_name = virtualFile.getVirfile_name();
 		int virfile_id = virtualFile.getVirfile_id();
-		System.out.println("video_path : " + video_path + " | video_name : " + video_name);
+		System.out.println("videoURL : " + videoURL + " | video_name : " + video_name);
 		ValueStack valueStack = ActionContext.getContext().getValueStack();
-		valueStack.set("video_path", video_path);
+		valueStack.set("videoURL", videoURL);
 		valueStack.set("video_name", video_name);
 		valueStack.set("virfile_id", virfile_id);
 		return "videoPreview_success";
@@ -725,21 +683,22 @@ public class StorageServiceImpl implements StorageService {
 		List<RealFile> rlist = storageDao.getRealFileById(realFile);
 		realFile = rlist.get(0);
 		System.out.println(realFile);
-		String image_path = realFile.getPreview_path();
+		String image_path = realFile.getFile_path();
 		System.out.println("image_path : " + image_path);
+		String imageURL = getPreviewURL(image_path);
 		
 		HttpServletResponse response = ServletActionContext.getResponse();
         response.setCharacterEncoding("UTF-8");
         try {
             PrintWriter out = response.getWriter();
-            out.print(image_path);
+            out.print(imageURL);
              
         } catch (IOException e) {
             e.printStackTrace();
         }
 		
 		ValueStack valueStack = ActionContext.getContext().getValueStack();
-		valueStack.set("image_path", image_path);
+		valueStack.set("imageURL", imageURL);
 		return "imagePreview_success";
 	}
 
@@ -763,21 +722,22 @@ public class StorageServiceImpl implements StorageService {
 		List<RealFile> rlist = storageDao.getRealFileById(realFile);
 		realFile = rlist.get(0);
 		System.out.println(realFile);
-		String music_path = realFile.getPreview_path();
+		String music_path = realFile.getFile_path();
 		System.out.println("music_path : " + music_path);
+		String musicURL = getPreviewURL(music_path);
 		
 		HttpServletResponse response = ServletActionContext.getResponse();
         response.setCharacterEncoding("UTF-8");
         try {
             PrintWriter out = response.getWriter();
-            out.print(music_path);
+            out.print(musicURL);
              
         } catch (IOException e) {
             e.printStackTrace();
         }
 		
 		ValueStack valueStack = ActionContext.getContext().getValueStack();
-		valueStack.set("music_path", music_path);
+		valueStack.set("musicURL", musicURL);
 		return "musicPreview_success";
 	}
 
@@ -785,7 +745,7 @@ public class StorageServiceImpl implements StorageService {
 
 
 
-
+	//文档预览
 	@Override
 	public String documentPreview(VirtualFile virtualFile) {
 		System.out.println("==StorageServiceImpl.musicPreview(VirtualFile virtualFile)");
@@ -797,11 +757,12 @@ public class StorageServiceImpl implements StorageService {
 		List<RealFile> rlist = storageDao.getRealFileById(realFile);
 		realFile = rlist.get(0);
 		System.out.println(realFile);
-		String document_path = realFile.getPreview_path();
+		String document_path = realFile.getFile_path();
 		System.out.println("document_path : " + document_path);
+		String documentURL = getPreviewURL(document_path);
 		
 		ValueStack valueStack = ActionContext.getContext().getValueStack();
-		valueStack.set("document_path", document_path);
+		valueStack.set("documentURL", documentURL);
 		valueStack.set("virfile_ext", virtualFile.getVirfile_ext());
 		return "documentPreview_success";
 	}

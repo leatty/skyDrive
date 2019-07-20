@@ -6,6 +6,7 @@ import com.opensymphony.xwork2.ModelDriven;
 import xin.trooper.storage.domain.Users;
 import xin.trooper.storage.service.StorageService;
 import xin.trooper.storage.service.UserService;
+import xin.trooper.storage.utils.StorageUtils;
 
 public class UserAction extends ActionSupport implements ModelDriven<Users>{
 	/**
@@ -35,6 +36,8 @@ public class UserAction extends ActionSupport implements ModelDriven<Users>{
 	 */
 	public String regist() {
 		System.out.println("==UserAction.regist()");
+		String MD5password = StorageUtils.getStringMD5(users.getUser_password());
+		users.setUser_password(MD5password);
 		String status = userService.regist(users);
 		return status;
 	}
@@ -47,6 +50,8 @@ public class UserAction extends ActionSupport implements ModelDriven<Users>{
 	 */
 	public String login() {
 		System.out.println("==UserAction.login()");
+		String MD5password = StorageUtils.getStringMD5(users.getUser_password());
+		users.setUser_password(MD5password);
 		System.out.println(users);
 		String status = userService.login(users);
 		

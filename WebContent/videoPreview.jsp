@@ -54,7 +54,7 @@
 
             <div style="height:500px;background-color: #ddd;margin: 30px 20px 0 20px;">
 				<video id="example_video_1" class="video-js vjs-default-skin" preload="none" autoplay="autoplay" style="height:500px; width: auto">
-    				<source src="http://localhost:8080/file<s:property value="video_path"/>" type="video/mp4">
+    				<source id="videosource" src="" type="video/mp4">
  				</video>
             </div>
 
@@ -80,6 +80,17 @@
 <script type="text/javascript" src="js/index.js"></script>
 <script type="text/javascript" src="js/video-js/video.js"></script>
  <script type="text/javascript">
+ 
+ 
+    $("#videosource").attr("src","<s:property value="videoURL"/>"); 
+ 
+	//解决自动播放偶尔失效问题
+	$(document).ready(function(){
+		
+		$('#example_video_1').trigger('play');
+	});
+	
+	
 	   var player = videojs('example_video_1',{
 		    muted: false,
 			controls : true,      
@@ -88,10 +99,7 @@
 			autoplay : true,
 			loop : true,
 		});
-	 //解决自动播放偶尔失效问题
-		$(document).ready(function(){
-			$('#example_video_1').trigger('play');
-		});
+	 
 	 //logo点击回到我的文件
 	 $(".drivelogo").click(function () {
 	   	console.log(".drivelogo");

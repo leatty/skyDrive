@@ -414,7 +414,7 @@ Users existUser = (Users)request.getSession().getAttribute("loginedUser");
 	    $("#copyLink").click(function () {
 	        console.log("share_id="+share_id);
 	        console.log("virfile_id="+virfile_id);
-	        var link = "http://localhost:8080/webstorage/storage_shareDownload.action?share_id=" + share_id;
+	        var link = "<s:property value="partURL"/>/webstorage/storage_shareDownload.action?share_id=" + share_id;
 	    	console.log(link);
 	    	if(share_id == null){
 	    		alert("请选择文件！");

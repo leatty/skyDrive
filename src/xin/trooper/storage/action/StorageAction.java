@@ -48,10 +48,14 @@ public class StorageAction  extends ActionSupport{
 	//文件上传要准备属性和方法
 	//文件上传提供的三个属性和需要的set方法
 	private String uploadFileName;     //文件名称
-	private File upload; 	           //上传文件
+	private String md5;                //文件的md5值
+ 	private File upload; 	           //上传文件
 	private String uploadContextType; //文件类型
 	public void setUploadFileName(String uploadFileName) {
 		this.uploadFileName = uploadFileName;
+	}
+	public void setMd5(String md5) {
+		this.md5 = md5;
 	}
 	public void setUpload(File upload) {
 		this.upload = upload;
@@ -62,7 +66,7 @@ public class StorageAction  extends ActionSupport{
 	public String upload() throws IOException {
 		System.out.println("==StorageAction.upload()");
 		String status = null;
-		status = storageService.upload(uploadFileName, upload, uploadContextType);
+		status = storageService.upload(uploadFileName, upload, uploadContextType, md5);
 		System.out.println("[status: " + status + " ]");
 		return status;
 		

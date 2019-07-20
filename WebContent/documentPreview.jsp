@@ -8,7 +8,7 @@
 <title>顺顺网盘</title>
 </head>
 <body>
-	<p id="dcpath" hidden="true"><s:property value="document_path"/></p>
+	<p id="dcpath" hidden="true"><s:property value="documentURL"/></p>
 	<p id="dcext" hidden="true"><s:property value="virfile_ext"/></p>
 
 
@@ -29,22 +29,19 @@
 <script type="text/javascript">
 	//判断用户是否登录
 	$(document).ready(function(){
-  	if($("#dcext").text() == ".txt"){
-		  console.log("this is txt file");
-		  window.location.href="http://localhost:8080/file" + $("#dcpath").text();
-		  //window.location.href="js/pdfjs/web/viewer.html?"+"http://localhost:8080/file" + $("#dcpath").text();
-  		}else if($("#dcext").text() == ".doc" || $("#dcext").text() == ".xls" || 
+  	if($("#dcext").text() == ".doc" || $("#dcext").text() == ".xls" || 
   				$("#dcext").text() == ".vsd" || $("#dcext").text() == ".ppt" ||
   				$("#dcext").text() == ".docx" || $("#dcext").text() == ".xlsx" || 
   				$("#dcext").text() == ".vsdx" || $("#dcext").text() == ".pptx"){
+  			//office全家桶预览未实现.....
   			
   		}else if($("#dcext").text() == ".pdf"){
 			console.log("this is pdf file");
 			console.log($("#dcext").text());
-			window.location.href="js/pdfjs/web/viewer.html?file="+"http://localhost:8080/file" + $("#dcpath").text();
-  		}else if($("#dcext").text() == ".js"){
-			console.log("this is javascript file");
-			window.location.href="http://localhost:8080/file" + $("#dcpath").text();
+			window.location.href="js/pdfjs/web/viewer.html?file=" + $("#dcpath").text();
+  		}else if($("#dcext").text() == ".js" || $("#dcext").text() == ".txt"){
+			console.log("this is text file");
+			window.location.href= $("#dcpath").text();
   		}
   	
   	

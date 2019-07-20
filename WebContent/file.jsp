@@ -41,7 +41,10 @@
     /* 无效，写在了galpop.css里面 */
     
 </style>
+<script src="js/spark-md5.js"></script>
 </head>
+
+<body onload="init()">
 <!--顶部-->
 <div class="nav">
     <div class="nav cl">
@@ -341,12 +344,13 @@
             <div class="modal-body">
                 <form method="post" enctype="multipart/form-data" id="uploadform" action="storage_upload.action">
                     <input type="file" name="upload" id="fileData"><br>
+                    <input type="hidden" name="md5" id="md5">
                     
                 </form>
             </div>
             <div class="modal-footer">
             	<button type="button" class="btn btn-success" id="upload">确定</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="upmdlclosebtn" type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
             </div>
         </div>
     </div>
@@ -424,7 +428,7 @@
 
 
 
-<body>
+
 <!--<script type="text/javascript" src="js/jquery-1.8.3.min.js"></script>-->
 <script type="text/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="js/jquery-ui.min.js"></script>
@@ -484,10 +488,6 @@
 	
 	
 	//定义需要用到的变量和数组
-	var server_protocol = 'http://';
-	var server_name = 'localhost';
-	var server_port = ':8080';
-	var server_resource = 'file';
 	var virfile_id = null;
 	var virfile_ext = null;
 	var virfile_name = null;
@@ -681,6 +681,62 @@
             }); */
     })
     
+    
+    //关闭上传窗口时清空上传控件内容
+    $("#upmdlclosebtn").click(function () {
+    	var file = $("#fileData");
+    	file.after(file.clone().val(""));
+        file.remove();
+        init();
+    })
+    
+    
+    //计算文件md5
+	function init() {
+              document.getElementById('fileData').addEventListener('change', function () {
+                  var blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice,
+                      file = this.files[0],
+                      chunkSize = 2097152,                             // Read in chunks of 2MB
+                      chunks = Math.ceil(file.size / chunkSize),
+                      currentChunk = 0,
+                      spark = new SparkMD5.ArrayBuffer(),
+                      fileReader = new FileReader();
+
+                  fileReader.onload = function (e) {
+                      console.log('read chunk nr', currentChunk + 1, 'of', chunks);
+                      spark.append(e.target.result);                   // Append array buffer
+                      currentChunk++;
+
+                      if (currentChunk < chunks) {
+                          loadNext();
+                      } else {
+                          console.log('finished loading');
+                          var hash = spark.end();
+                          document.getElementById('md5').value = hash;
+                          console.info('computed hash',hash);  // Compute hash
+                      }
+                  };
+
+                  fileReader.onerror = function () {
+                      console.warn('oops, something went wrong.');
+                  };
+
+                  function loadNext() {
+                      var start = currentChunk * chunkSize,
+                          end = ((start + chunkSize) >= file.size) ? file.size : start + chunkSize;
+
+                      fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
+                  }
+
+                  loadNext();
+              });
+          }
+
+    
+    
+    
+    
+    
     // 上传文件
     $("#upload").click(function () {
         //var formData = new FormData();
@@ -855,15 +911,59 @@
 			  $("#attr_name").attr("value",virfile_name)
 			  //$("#attr_path").attr("value",virfile_path)
 			  $("#attr_path").attr("value","myfile/browser/cache")
-			  var sizeOfMB = virfile_size;
+			  /* var sizeOfMB = virfile_size;
 			  sizeOfMB = sizeOfMB/1024/1024;
 			  sizeOfMB = sizeOfMB.toFixed(2);
-			  sizeOfMB = sizeOfMB + " MB";
-			  console.log(sizeOfMB);
-			  $("#attr_size").attr("value",sizeOfMB)
+			  sizeOfMB = sizeOfMB + " MB"; */
+			  
+			  var finalSize;
+				  size = virfile_size/1073741824;
+				  finalSize =size.toFixed(2) + 'GB';
+				  if(size < 1){
+					  size = virfile_size/1048576;
+					  finalSize =size.toFixed(2) + 'MB';
+					  if(size < 1){
+						  size = virfile_size/1024;
+						  finalSize =size.toFixed(2) + 'KB';
+						  if(size < 1){
+							  size = virfile_size;
+							  finalSize =size + 'Byte';
+						  }
+					  }
+				  }
+			  console.log(finalSize);
+			  $("#attr_size").attr("value",finalSize)
 			  $("#attr_date").attr("value",virfile_upload)
 			  $('#attrModal').modal('show');
-		  }
+			  /* $("#attr_name").attr("value",virfile_name)
+			  //$("#attr_path").attr("value",virfile_path)
+			  $("#attr_path").attr("value","myfile/browser/cache")
+			  var size = virfile_size/1024;
+			  size = size/1024;
+			  size = size/1024;
+			  var finalsize = "";
+			  size = size.toFixed(2);
+			  if(size = 0.00){
+				  size = virfile_size/1024;
+				  size = size.toFixed(2);
+				  finalsize = size + " MB";
+				  if(size == 0.00){
+					  size = virfile_size/1024;
+					  size = size.toFixed(2);
+					  finalsize = size + " KB";
+					  if(size == 0.00){
+						  size = virfile_size;
+						  size = size.toFixed(2);
+						  finalsize = size + " Byte";
+					  }
+				  }
+				  console.log(finalsize);
+				  $("#attr_size").attr("value",size)
+				  $("#attr_date").attr("value",virfile_upload)
+				  $('#attrModal').modal('show');
+			  }  */
+			  }
+			  
 		   
 	  }},
 	  {text: '预览', onclick: function(e) {
@@ -886,7 +986,7 @@
        		          } else {
        		        	  console.log(result);
        		        	  console.log("error");
-       		        	  var image_path = server_protocol + server_name + server_port + "/" + server_resource + result;
+       		        	  var image_path = result;
        		        	  $("#previewImage").attr("href",image_path);
          		    	  $("#previewImage").click();
          		    	  $("#lighter-content").children("img").addClass("imgautosize");
@@ -923,12 +1023,12 @@
       	       		         success : function(result) {//返回数据根据结果进行相应的处理 
       	       		          if ( result.success ) {
       	       		        	  console.log("result = " + result);
-      	       		        	  var music_path = server_protocol + server_name + server_port + "/" + server_resource + result;
+      	       		        	  var music_path = result;
       	       		          } else {
       	       		        	  console.log(result);
       	       		        	  console.log("error");
-      	       		        	  var music_path = server_protocol + server_name + server_port + "/" + server_resource + result;
-      	       		        	  $("#musicplayer").attr("src",music_path);
+      	       		        	  var musicURL = result;
+      	       		        	  $("#musicplayer").attr("src",musicURL);
       	       		        	  var xx = '<s:property value="music_path"/>';
       	       		        	  console.log(virfile_name);
       	       		        	  $("#musicModalLabel").text(virfile_name);

@@ -12,7 +12,7 @@ import xin.trooper.storage.domain.VirtualFile;
 
 public interface StorageService {
 
-	 String upload(String uploadFileName,File upload,String  uploadContextType) throws IOException;
+	 String upload(String uploadFileName,File upload,String  uploadContextType, String md5) throws IOException;
 
 	String findALLStorageFile();
 

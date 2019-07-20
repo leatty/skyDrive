@@ -52,17 +52,6 @@ public class StorageUtils {
 			return "/" + d1 + "/" + d2; 
 		}
 		
-		public static void main(String[] args) {
-			System.out.println(getUuidFileName("aa.txt"));
-		}
-	
-	
-	
-	
-	
-	
-	
-	
 	
  
     /**
@@ -98,7 +87,7 @@ public class StorageUtils {
      * @return 'null' if cannot get MessageDigest
      */
     
-    private static String getStringMD5( String s) {
+    public static String getStringMD5( String s) {
         MessageDigest mdInst;
         try {
             // 获得MD5摘要算法的 MessageDigest 对象
@@ -180,46 +169,7 @@ public class StorageUtils {
     }
 
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    /**  
-         * 从服务器上 删除文件  
-     * @param fileName 文件名  
-     * @return true: 从服务器上删除成功   false:否则失败  
-     */  
-    public boolean deleteStorageFile(String fileName){
-    	Boolean result = null;
-    	System.out.println("fileName = " + fileName);
-        File file=new File(fileName);   
-        if(file.exists()){ 
-        	System.out.println("exist");
-        	result =  file.delete();   
-        }else {
-        	System.out.println("not exist");
-        }   
-        return result;   
-    }
-	
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
     
     
     /**
